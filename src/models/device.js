@@ -6,11 +6,8 @@ const deviceSchema = mongoose.Schema({
         name: String
     },
     parameters:[{
-        parameter: {
-            type: mongoose.SchemaTypes.ObjectId,
-            ref: "Parameter"
-        },
-        
+        type: mongoose.SchemaTypes.ObjectId,
+        ref: "Parameter"
     }],
     broker: {
         provider: String,

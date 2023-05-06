@@ -1,1 +1,1 @@
-export let mqttClients = new Map();
+export let mqttClients = {};

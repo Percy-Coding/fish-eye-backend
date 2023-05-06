@@ -1,5 +1,5 @@
 import Aquarium from '../models/aquarium.js';
-
+import {startListening, stopListening} from './mqttSuscriberService.js';
 
 export async function createAquarium(req,res) {
     const aquarium = new Aquarium({
@@ -19,11 +19,22 @@ export async function createAquarium(req,res) {
 }
 
 export async function startDevice(req, res) {
-
+    const { aquariumId } = req.params;
+    const aquarium = await Aquarium.findOne({_id: aquariumId}).populate('smartDevice');
+    if(aquarium) {
+        startListening(aquarium, handleSensorDataCallback);
+        res.send(`AQUARIUM WITH ID ${aquarium._id} LISTENING FOR CHANGES`);
+    }
 }
 
 export async function stopDevice(req, res) {
-
+    const { aquariumId } = req.params;
+    const aquarium = await Aquarium.findOne({_id: aquariumId}).populate('smartDevice');
+    if(aquarium) {
+        stopListening(aquarium);
+        res.send(`AQUARIUM WITH ID ${aquarium._id} STOPPED`);
+    }
+    
 }
 
 export async function getAllAquariumsByOwnerId(req, res){
@@ -50,6 +61,8 @@ export async function linkDeviceToAquarium(req, res){
         { new: true } // Return the updated document
         );
 
+
+
         res.status(200).json(updatedAquarium);
     } catch (error) {
         console.error(error);
@@ -68,4 +81,17 @@ export async function deleteAquariumById(req, res){
         console.error(error);
         res.status(500).json({ message: 'Server error' });
     }
+}
+
+async function handleSensorDataCallback(sensorData){
+    console.log("SENSOR DATA TYPE: " + typeof sensorData)
+    console.log("Temperature: ",sensorData.temperature);
+    console.log("pH: ",sensorData.pH);
+    console.log("turbidity: ",sensorData.turbidity);
+    console.log("tds: ",sensorData.tds);
+    
+}
+
+function linkDeviceParameters(){
+
 }
