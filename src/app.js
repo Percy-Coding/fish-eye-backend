@@ -22,12 +22,12 @@ app.get('/', (req, res) => {
 
 //testing purposes only
 app.get('/test', async (req, res) => {
-    //const aquarium = await Aquarium.findById('64562e6ff97215928a63ece1');
-    //const populatedAquarium = await aquarium.populate('smartDevice');
-    //res.json({populatedAquarium});
-    const aquarium = await Device.findById('64563216523f7419f62c3e7d');
-    //const populatedAquarium = await aquarium.populate('parameters');
-    res.json({aquarium});
+    const aquarium = await Aquarium.findById('64564dd2c57ce5b78d9dda43');
+    aquarium.readings.forEach((reading) => {
+        reading.values = reading.values.filter((value) => value.value != null);
+      });
+    await aquarium.save();
+    res.send('eje')
 });
 
 //mongodb connection

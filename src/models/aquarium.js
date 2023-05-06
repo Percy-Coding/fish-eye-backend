@@ -21,11 +21,13 @@ const aquariumSchema = mongoose.Schema({
         default: false
     },
     readings:[{
+        _id: false,
         parameter: {
             type: mongoose.SchemaTypes.ObjectId,
             ref: "Parameter"
         },
         values:[{
+            _id: false,
             value: Number,
             timestamp: Date
         }]

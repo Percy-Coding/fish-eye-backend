@@ -60,10 +60,18 @@ export async function linkDeviceToAquarium(req, res){
         { smartDevice: deviceId },
         { new: true } // Return the updated document
         );
+        
+        const populatedAquarium = await updatedAquarium.populate('smartDevice');
+        for (const parameterId of populatedAquarium.smartDevice.parameters) {
+            populatedAquarium.readings.push({
+                parameter: parameterId,
+                values: []
+            })
+        }
 
+        await populatedAquarium.save();
 
-
-        res.status(200).json(updatedAquarium);
+        res.status(200).json(populatedAquarium);
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: 'Server error' });
@@ -83,15 +91,28 @@ export async function deleteAquariumById(req, res){
     }
 }
 
-async function handleSensorDataCallback(sensorData){
-    console.log("SENSOR DATA TYPE: " + typeof sensorData)
-    console.log("Temperature: ",sensorData.temperature);
-    console.log("pH: ",sensorData.pH);
-    console.log("turbidity: ",sensorData.turbidity);
-    console.log("tds: ",sensorData.tds);
-    
-}
+async function handleSensorDataCallback(aquarium, sensorData){
+    const mapSensorData = new Map();
+    mapSensorData.set('pH',sensorData.pH);
+    mapSensorData.set('Temperature',sensorData.temperature);
+    mapSensorData.set('Turbidity',sensorData.turbidity);
+    mapSensorData.set('Total dissolved solids', sensorData.tds);
 
-function linkDeviceParameters(){
+    const populatedAquarium = await aquarium
+                                .populate({
+                                    path: 'readings', 
+                                    populate: {
+                                        path: 'parameter',
+                                        model: 'Parameter'
+                                    }
+                                });
+                                            
+    for (const reading of populatedAquarium.readings) {
+        const readingValue = mapSensorData.get(reading.parameter.name);
+        reading.values.push({value: readingValue, timestamp: Date.now() })
+    }
 
+    await populatedAquarium.save();
+    console.log(`Reading sent : ${JSON.stringify(aquarium.readings)}`);
+        
 }

@@ -42,7 +42,7 @@ export async function startListening(aquarium, handleSensorDataCallback) {
             if(aquarium.active){
                 const sensorData = JSON.parse(message.toString());
                 console.log(message.toString());
-                handleSensorDataCallback(sensorData);
+                handleSensorDataCallback(aquarium, sensorData);
             }
         }
     });
