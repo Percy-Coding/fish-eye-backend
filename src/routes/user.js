@@ -1,11 +1,10 @@
 import express from 'express';
-import {registerUser, login} from '../services/userService';
+import {registerUser, login, getAllUsers} from '../services/userService.js';
 
 const router = express.Router();
 
-//create user
+router.get('/users', getAllUsers);
 router.post('/users', registerUser);
-
 router.post('/users/login', login);
 
 

@@ -19,4 +19,11 @@ const parameterSchema = mongoose.Schema({
 
 });
 
+parameterSchema.pre('save', async function(next){
+    if(this.isModified()) {
+        this.updatedAt = Date.now();
+    }
+    next();
+})
+
 export default mongoose.model('Parameter', parameterSchema);

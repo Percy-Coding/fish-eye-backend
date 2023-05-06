@@ -3,12 +3,22 @@ import mongoose from 'mongoose';
 const aquariumSchema = mongoose.Schema({
     name:{
         type: String,
-        required: true
+        required: true,
+        unique: true,
+        trim: true
     },
-    ownerId: {
+    owner: {
         type: mongoose.SchemaTypes.ObjectId,
         required: true,
         ref: "User"
+    },
+    smartDevice: {
+        type: mongoose.SchemaTypes.ObjectId,
+        ref: "Device"
+    },
+    active: {
+        type: Boolean,
+        default: false
     },
     readings:[{
         parameter: {
@@ -20,9 +30,13 @@ const aquariumSchema = mongoose.Schema({
             timestamp: Date
         }]
     }],
-    lastCommunication: Date,
-    location:{
-
+    lastCommunication: {
+        type: Date,
+        default: null
+    },
+    geoLocation:{
+        latitude: Number,
+        altitude: Number
     },
     createdAt: {
         type: Date,
@@ -35,5 +49,12 @@ const aquariumSchema = mongoose.Schema({
     }
 
 });
+
+aquariumSchema.pre('save', async function(next){
+    if(this.isModified()) {
+        this.updatedAt = Date.now();
+    }
+    next();
+})
 
 export default mongoose.model('Aquarium', aquariumSchema);

@@ -1,13 +1,28 @@
-import User from '../models/user';
+import User from '../models/user.js';
 
 export async function registerUser(req,res) {
-    const { username } = req.body;
-    let user = await User.findOne({ username: username});
+    const { 
+        username, 
+        name, 
+        lastName,
+        password,
+        dateOfBirth,
+        email
+    } = req.body;
+
+    let user = await User.findOne({ username });
     if (user) return res.status(409).json({message: 'User already registered'});
 
-    user = new User(req.body);
-    user
-        .save()
+    user = new User(
+        username, 
+        name, 
+        lastName,
+        password,
+        dateOfBirth,
+        email
+    );
+
+    user.save()
         .then((data) => {
             res.status(201).json({
                 message: 'User created successfully',
@@ -30,4 +45,13 @@ export async function login(req, res){
         });
     } else return res.status(401).json({message: 'Username or password incorrect'});
 
+}
+
+export async function getAllUsers(req, res) {
+    try{
+        const users = await User.find().select('-password');
+        res.status(200).json(users);
+    } catch(err){
+        res.status(500).json({message: err.message});
+    }
 }
