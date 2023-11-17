@@ -2,10 +2,8 @@ import express from 'express';
 import mongoose from 'mongoose';
 import * as routes from './routes/index.js';
 import {applyMiddlewareToRoutes} from './middlewares/routerMiddlewares.js'
-import { mqttClients } from './utils/mqttVariables.js';
 import dotenv from 'dotenv';
 import Aquarium from './models/aquarium.js';
-import Device from './models/device.js';
 
 dotenv.config();
 const app = express();

@@ -207,7 +207,7 @@ async function handleSensorDataCallback(aquarium, sensorData){
     }
 
     await populatedAquarium.save();
-    console.log(`Reading sent : ${JSON.stringify(aquarium.readings)}`);
+    //console.log(`Reading sent : ${JSON.stringify(aquarium.readings)}`);
         
 }
 

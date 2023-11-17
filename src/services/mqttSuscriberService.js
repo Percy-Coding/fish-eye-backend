@@ -14,17 +14,20 @@ export async function startListening(aquarium, handleSensorDataCallback) {
         });
 
         mqttClients[aquarium._id] = client;
+        const topicDeviceId = aquarium.smartDevice._id;
+
         console.log(`Aquarium Active Status: ${aquarium.active}`);
+
         if(!aquarium.active){
             // Subscribe to the appropriate MQTT topics
-            client.subscribe(`monitoring/activate`);
-            console.log('Subscribed to topic: monitoring/activate');
-            const startData = {command: 'start', aquariumId: aquarium._id};
-            client.publish(`monitoring/activate`, JSON.stringify(startData));
-            console.log('Sent startMessage to topic: monitoring/activate');
+            console.log(`Subscribed to topic: ${topicDeviceId}/monitoring`);
+            client.subscribe(`${topicDeviceId}/monitoring`);
+            console.log(`Sent startMessage to topic: ${topicDeviceId}/monitoring`);
+            client.publish(`${topicDeviceId}/monitoring`,'start');
         }else{
-            client.subscribe(`${aquarium._id}/sensor-data`);
-            console.log(`Subscribed to topic: ${aquarium._id}/sensor-data`);
+            client.publish(`${topicDeviceId}/monitoring`,'start');
+            client.subscribe(`${topicDeviceId}/sensor-data`);
+            console.log(`Subscribed to topic: ${topicDeviceId}/sensor-data`);
         }
         
 
@@ -33,16 +36,16 @@ export async function startListening(aquarium, handleSensorDataCallback) {
         // Set up a message handler for the MQTT client
         client.on('message', async (topic, message) => {
             // Handle incoming MQTT messages
-            if(topic === 'monitoring/activate'){
+            if(topic === `${topicDeviceId}/monitoring`){
                 if(message.toString() === 'sensor data on' && !aquarium.active){
                     aquarium.active = true;
                     await aquarium.save();
-                    client.subscribe(`${aquarium._id}/sensor-data`);
-                    console.log(`Subscribed to topic: ${aquarium._id}/sensor-data`);
+                    client.subscribe(`${topicDeviceId}/sensor-data`);
+                    console.log(`Subscribed to topic: ${topicDeviceId}/sensor-data`);
                 }
             }
 
-            if(topic === `${aquarium._id}/sensor-data`){
+            if(topic === `${topicDeviceId}/sensor-data`){
                 if(aquarium.active){
                     const sensorData = JSON.parse(message.toString());
                     console.log(message.toString());
@@ -60,7 +63,7 @@ export async function stopListening(aquarium) {
         const client = mqttClients[aquarium._id];
         console.log(`CLIENT NOT ACTIVE FOR aquarium ${aquarium._id}`);
         if(client?.connected){
-            client.publish(`monitoring/activate`, 'stop');
+            client.publish(`${aquarium.smartDevice._id}/monitoring`, 'stop');
             client.unsubscribe('#');
             client.end();
             mqttClients[aquarium._id] = undefined;
