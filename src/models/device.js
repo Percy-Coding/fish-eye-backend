@@ -6,17 +6,20 @@ const deviceSchema = mongoose.Schema({
         name: String
     },
     parameters:[{
-        parameter: {
-            type: mongoose.SchemaTypes.ObjectId,
-            ref: "Parameter"
-        }
+        type: mongoose.SchemaTypes.ObjectId,
+        ref: "Parameter"
     }],
     broker: {
         provider: String,
         host: String,
         port: Number,
         accessUserName: String,
-        accessPassword: String
+        accessPassword: String,
+        protocol: String
+    },
+    usedByAquarium: {
+        type: Boolean,
+        default: false
     },
     createdAt: {
         type: Date,
@@ -29,5 +32,12 @@ const deviceSchema = mongoose.Schema({
     }
 
 });
+
+deviceSchema.pre('save', async function(next){
+    if(this.isModified()) {
+        this.updatedAt = Date.now();
+    }
+    next();
+})
 
 export default mongoose.model('Device', deviceSchema);
